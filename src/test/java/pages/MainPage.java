@@ -16,8 +16,6 @@ public class MainPage {
     // Локаторы
     private final By orderButtonTop = By.className("Button_Button__ra12g");
     private final By orderButtonBottom = By.xpath("(//button[contains(@class, 'Button_Button__ra12g') and contains(text(), 'Заказать')])[2]");
-    private final By accordionButton = By.id("accordion__heading-0");
-    private final By accordionText = By.id("accordion__panel-0");
 
     public MainPage(WebDriver driver) {
         this.driver = driver;
@@ -32,17 +30,34 @@ public class MainPage {
         clickWithScroll(orderButtonBottom);
     }
 
-    public void clickAccordionButton() {
-        clickWithScroll(accordionButton);
+    /**
+     * Кликает по кнопке аккордеона с указанным индексом
+     * @param index индекс элемента аккордеона (начиная с 0)
+     */
+    public void clickAccordionButton(int index) {
+        By locator = By.id("accordion__heading-" + index);
+        clickWithScroll(locator);
     }
 
-    public String getAccordionText() {
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(accordionText)).getText();
+    /**
+     * Возвращает текст ответа аккордеона с указанным индексом
+     * @param index индекс элемента аккордеона (начиная с 0)
+     * @return текст ответа
+     */
+    public String getAccordionText(int index) {
+        By locator = By.id("accordion__panel-" + index);
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(locator)).getText();
     }
 
-    public boolean isAccordionTextDisplayed() {
+    /**
+     * Проверяет, отображается ли текст ответа аккордеона
+     * @param index индекс элемента аккордеона
+     * @return true если текст отображается, false в противном случае
+     */
+    public boolean isAccordionTextDisplayed(int index) {
         try {
-            return driver.findElement(accordionText).isDisplayed();
+            By locator = By.id("accordion__panel-" + index);
+            return driver.findElement(locator).isDisplayed();
         } catch (Exception e) {
             return false;
         }

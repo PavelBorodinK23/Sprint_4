@@ -27,7 +27,7 @@ public class OrderPage {
     private final By commentField = By.xpath("//input[@placeholder='Комментарий для курьера']");
     private final By orderButton = By.xpath("//button[contains(@class, 'Button_Middle__1CSJM') and text()='Заказать']");
     private final By confirmButton = By.xpath("//button[text()='Да']");
-    private final By successModal = By.className("Order_ModalHeader__3FDaJ");
+    private final By successModal = By.xpath("//div[contains(@class, 'Order_Modal')]//div[contains(text(), 'Заказ оформлен')]");
 
     public OrderPage(WebDriver driver) {
         this.driver = driver;

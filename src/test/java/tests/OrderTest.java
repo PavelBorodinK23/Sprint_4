@@ -15,7 +15,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
 public class OrderTest {
@@ -74,21 +74,24 @@ public class OrderTest {
 
     @Test
     public void testOrderFlow() {
-        try {
-            if (fromTopButton) {
-                mainPage.clickOrderButtonTop();
-            } else {
-                mainPage.clickOrderButtonBottom();
-            }
-
-            orderPage.fillOrderFormFirstPage(name, surname, address, metro, phone);
-            orderPage.fillOrderFormSecondPage(date, comment);
-            orderPage.confirmOrder();
-
-            assertTrue("Окно успешного заказа не отображается", orderPage.isOrderSuccess());
-        } catch (Exception e) {
-            fail("Тест упал с исключением: " + e.getMessage());
+        // Выбор точки входа (верхняя или нижняя кнопка заказа)
+        if (fromTopButton) {
+            mainPage.clickOrderButtonTop();
+        } else {
+            mainPage.clickOrderButtonBottom();
         }
+
+        // Заполнение первой страницы формы
+        orderPage.fillOrderFormFirstPage(name, surname, address, metro, phone);
+
+        // Заполнение второй страницы формы
+        orderPage.fillOrderFormSecondPage(date, comment);
+
+        // Подтверждение заказа
+        orderPage.confirmOrder();
+
+        // Проверка успешного оформления
+        assertTrue("Окно успешного заказа не отображается", orderPage.isOrderSuccess());
     }
 
     @After
