@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import pages.MainPage;
 import pages.OrderPage;
@@ -22,7 +23,7 @@ public class OrderTest {
     private WebDriver driver;
     private MainPage mainPage;
     private OrderPage orderPage;
-
+    private final String browser;
     private final String name;
     private final String surname;
     private final String address;
@@ -32,8 +33,9 @@ public class OrderTest {
     private final String comment;
     private final boolean fromTopButton;
 
-    public OrderTest(String name, String surname, String address, String metro,
+    public OrderTest(String browser, String name, String surname, String address, String metro,
                      String phone, String date, String comment, boolean fromTopButton) {
+        this.browser = browser;
         this.name = name;
         this.surname = surname;
         this.address = address;
@@ -44,28 +46,51 @@ public class OrderTest {
         this.fromTopButton = fromTopButton;
     }
 
-    @Parameterized.Parameters(name = "Тестовые данные: {0}, {1}, точка входа: {7}")
+    @Parameterized.Parameters(name = "Браузер: {0}, Данные: {1} {2}, Точка входа: {8}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                {TestData.getOrderData()[0][0].toString(), TestData.getOrderData()[0][1].toString(),
-                        TestData.getOrderData()[0][2].toString(), TestData.getOrderData()[0][3].toString(),
-                        TestData.getOrderData()[0][4].toString(), TestData.getOrderData()[0][5].toString(),
-                        TestData.getOrderData()[0][6].toString(), true},
+                {"chrome", TestData.getOrderData()[0][0], TestData.getOrderData()[0][1],
+                        TestData.getOrderData()[0][2], TestData.getOrderData()[0][3],
+                        TestData.getOrderData()[0][4], TestData.getOrderData()[0][5],
+                        TestData.getOrderData()[0][6], true},
 
-                {TestData.getOrderData()[1][0].toString(), TestData.getOrderData()[1][1].toString(),
-                        TestData.getOrderData()[1][2].toString(), TestData.getOrderData()[1][3].toString(),
-                        TestData.getOrderData()[1][4].toString(), TestData.getOrderData()[1][5].toString(),
-                        TestData.getOrderData()[1][6].toString(), false}
+                {"chrome", TestData.getOrderData()[1][0], TestData.getOrderData()[1][1],
+                        TestData.getOrderData()[1][2], TestData.getOrderData()[1][3],
+                        TestData.getOrderData()[1][4], TestData.getOrderData()[1][5],
+                        TestData.getOrderData()[1][6], false},
+
+                {"firefox", TestData.getOrderData()[0][0], TestData.getOrderData()[0][1],
+                        TestData.getOrderData()[0][2], TestData.getOrderData()[0][3],
+                        TestData.getOrderData()[0][4], TestData.getOrderData()[0][5],
+                        TestData.getOrderData()[0][6], true},
+
+                {"firefox", TestData.getOrderData()[1][0], TestData.getOrderData()[1][1],
+                        TestData.getOrderData()[1][2], TestData.getOrderData()[1][3],
+                        TestData.getOrderData()[1][4], TestData.getOrderData()[1][5],
+                        TestData.getOrderData()[1][6], false}
         });
+    }
+
+    @BeforeClass
+    public static void setupAll() {
+        WebDriverManager.chromedriver().setup();
+        WebDriverManager.firefoxdriver().setup();
     }
 
     @Before
     public void setUp() {
-        WebDriverManager.chromedriver().browserVersion("136.0.7103.93").setup();
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--start-maximized");
-        options.addArguments("--remote-allow-origins=*");
-        driver = new ChromeDriver(options);
+        switch (browser.toLowerCase()) {
+            case "firefox":
+                driver = new FirefoxDriver();
+                break;
+            case "chrome":
+            default:
+                ChromeOptions options = new ChromeOptions();
+                options.addArguments("--start-maximized");
+                options.addArguments("--remote-allow-origins=*");
+                driver = new ChromeDriver(options);
+        }
+
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         driver.get("https://qa-scooter.praktikum-services.ru/");
         mainPage = new MainPage(driver);
@@ -74,23 +99,16 @@ public class OrderTest {
 
     @Test
     public void testOrderFlow() {
-        // Выбор точки входа (верхняя или нижняя кнопка заказа)
         if (fromTopButton) {
             mainPage.clickOrderButtonTop();
         } else {
             mainPage.clickOrderButtonBottom();
         }
 
-        // Заполнение первой страницы формы
         orderPage.fillOrderFormFirstPage(name, surname, address, metro, phone);
-
-        // Заполнение второй страницы формы
         orderPage.fillOrderFormSecondPage(date, comment);
-
-        // Подтверждение заказа
         orderPage.confirmOrder();
 
-        // Проверка успешного оформления
         assertTrue("Окно успешного заказа не отображается", orderPage.isOrderSuccess());
     }
 
